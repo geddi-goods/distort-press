@@ -142,7 +142,7 @@ input[type=range]{accent-color:var(--accent)}
 .mask[open]{display:flex;flex-direction:column;gap:8px;padding-bottom:10px}
 .mask .hint{margin:0}
 #layerSettings{display:flex;flex-direction:column;gap:8px}
-#m3Params{display:flex;flex-direction:column;gap:8px}
+#m3Params,.m3sec{display:flex;flex-direction:column;gap:8px}
 .m3name{font-family:var(--f-mono);font-size:11px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:860px){
   .app{height:auto}
@@ -162,11 +162,11 @@ input[type=range]{accent-color:var(--accent)}
         <!-- LOGO: replace the span below with your inline SVG. Use fill="currentColor" so it takes the interface colour. -->
         <span class="mark">DISTORT PRESS</span>
       </span>
-      <span class="tag">Halftone · threshold · glitch · 3D</span>
+      <span class="tag">Halftone · threshold · glitch · 3D · extrude</span>
     </div>
     <div class="actions">
       <label class="btn" for="file">Upload image or 3D</label>
-      <input id="file" type="file" accept="image/*,.glb,.gltf,.bin,.obj,.mtl,.stl" multiple hidden>
+      <input id="file" type="file" accept="image/*,.svg,.glb,.gltf,.bin,.obj,.mtl,.stl" multiple hidden>
       <button id="sampleBtn" class="btn ghost" type="button">Sample image</button>
       <button id="sample3dBtn" class="btn ghost" type="button">Sample 3D</button>
       <select id="exportSize" class="sel" aria-label="Export size">
@@ -190,11 +190,12 @@ input[type=range]{accent-color:var(--accent)}
     <section class="stage" id="stage">
       <div class="wrap" id="wrap">
         <canvas id="view" width="10" height="10"></canvas>
-        <div class="drop" id="drop" hidden>Drop an image or a 3D model<br>(.glb · .gltf · .obj · .stl)</div>
+        <div class="drop" id="drop" hidden>Drop an image, an SVG or a 3D model<br>(.svg · .glb · .gltf · .obj · .stl)</div>
       </div>
       <div class="stagebar">
         <button id="compareBtn" class="btn ghost small" type="button">Hold to see original</button>
         <button id="reseedBtn" class="btn ghost small" type="button">Reseed randomness</button>
+        <button id="reliefBtn" class="btn ghost small" type="button" title="Brightness becomes height">Make 3D relief</button>
         <span class="status" id="status">–</span>
       </div>
     </section>
@@ -281,6 +282,19 @@ input[type=range]{accent-color:var(--accent)}
     <img id="ovImg" alt="Exported image">
     <p>Right-click the image and choose Save Image (on a phone, long-press it).</p>
     <div class="row2"><a class="btn" id="ovLink" download="distort-press.png">Download</a><button class="btn primary" id="ovClose" type="button">Close</button></div>
+  </div>
+</div>
+<div class="overlay" id="svgAsk" hidden>
+  <div class="ovbox" role="dialog" aria-modal="true" aria-labelledby="svgAskTitle">
+    <h2 id="svgAskTitle" style="margin:0;font-size:15px;font-weight:600">Use this SVG as…</h2>
+    <p id="svgAskName"></p>
+    <div class="row2">
+      <button class="btn primary" type="button" data-svg="extrude">Extrude in 3D</button>
+      <button class="btn" type="button" data-svg="relief">3D relief</button>
+      <button class="btn" type="button" data-svg="flat">Flat image</button>
+      <button class="btn ghost" type="button" data-svg="cancel">Cancel</button>
+    </div>
+    <p>Extrude turns the shapes into solid objects. Relief turns brightness into height. Text must be converted to outlines first.</p>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -551,8 +565,15 @@ const FX={
 };
 
 /* ---------- 3D view settings ---------- */
-const V3DEF=()=>({rx:0,ry:0,rz:0,zoom:1,px:0,py:0,proj:'persp',fov:35,frame:'1:1',mat:'clay',laz:-40,lel:35,key:2.5,fill:.5,bg:255});
+const V3DEF=()=>({rx:0,ry:0,rz:0,zoom:1,px:0,py:0,proj:'persp',fov:35,frame:'1:1',mat:'clay',laz:-40,lel:35,key:2.5,fill:.5,bg:255,
+  exDepth:15,exBevel:1.5,exSmooth:3,exStagger:0,exMode:'auto',exTube:1,rfHeight:12,rfSmooth:2,rfDetail:300,rfDir:'light'});
+/* sections: [title, params, kind]. kind = only shown for that kind of 3D source ('svg' or 'relief') */
 const V3P=[
+  ['Extrude',[R('exDepth','Depth',0,100,.5,15,'%'),R('exBevel','Bevel',0,10,.1,1.5,'%'),R('exSmooth','Bevel steps',1,8,1,3),
+    R('exStagger','Stagger',0,100,1,0,'%'),S('exMode','Shapes',[['auto','Auto (fills + line tubes)'],['fill','Fills only'],['tube','Everything as tubes']],'auto'),
+    R('exTube','Tube thickness',.2,6,.1,1,'%')],'svg'],
+  ['Relief',[R('rfHeight','Height',0,60,.5,12,'%'),S('rfDir','Raised',[['light','Light areas'],['dark','Dark areas']],'light'),
+    R('rfSmooth','Smooth',0,10,.5,2),R('rfDetail','Detail',64,600,8,300)],'relief'],
   ['Rotate',[R('rx','X axis',-180,180,1,0,'°'),R('ry','Y axis',-180,180,1,0,'°'),R('rz','Z axis',-180,180,1,0,'°')]],
   ['Camera',[R('zoom','Zoom',.3,4,.01,1,'×'),R('px','Move X',-1,1,.01,0),R('py','Move Y',-1,1,.01,0),
     S('proj','Projection',[['persp','Perspective'],['ortho','Flat (no perspective)']],'persp'),R('fov','Lens',10,90,1,35,'°'),
@@ -560,6 +581,7 @@ const V3P=[
   ['Light & surface',[S('mat','Material',[['clay','Clay, smooth'],['flat','Clay, faceted'],['original','Original materials'],['depth','Depth (near = light)'],['normals','Surface normals']],'clay'),
     R('laz','Light from',-180,180,1,-40,'°'),R('lel','Light height',-90,90,1,35,'°'),R('key','Light',0,6,.05,2.5),R('fill','Fill light',0,3,.05,.5),R('bg','Background',0,255,1,255)]]];
 const V3ALL=V3P.flatMap(s=>s[1]);
+const GEOKEY=/^(ex|rf)/;
 const VIEWS={Front:[0,0,0],'¾ view':[20,-35,0],Side:[0,-90,0],Back:[0,180,0],Top:[90,0,0],Bottom:[-90,0,0]};
 const wrapDeg=a=>((a+180)%360+360)%360-180;
 
@@ -609,7 +631,7 @@ function fromData(d){state.layers=(d.layers||[]).map(makeLayer);if(!state.layers
   if(d.ink)state.ink=d.ink;if(d.paper)state.paper=d.paper;state.paperGrain=+d.grain||0;
   if(d.v3&&typeof d.v3==='object')state.v3={...V3DEF(),...d.v3};
   const top=state.layers[0];state.target=top.uid;const last=top.stack[top.stack.length-1];if(last&&!top.stack.some(i=>i.open))last.open=true}
-function applyLook(d){fromData(JSON.parse(JSON.stringify(d)));syncColors();buildAll();sync3D();if(m3.active){applyMat();srcVer++;baseCache=null}save();schedule()}
+function applyLook(d){fromData(JSON.parse(JSON.stringify(d)));syncColors();buildAll();sync3D();if(m3.active){if(m3.kind!=='model')rebuild();applyMat();srcVer++;baseCache=null}save();schedule()}
 
 const KEY='distort-press-v2',UKEY='distort-press-presets-v1';
 let saveT;function save(){clearTimeout(saveT);saveT=setTimeout(saveNow,400)}
@@ -626,13 +648,13 @@ function saveUser(){try{localStorage.setItem(UKEY,JSON.stringify(userPresets));r
    The model is drawn to a hidden WebGL canvas at the exact size the pipeline asks for,
    so the preview, the draft while dragging and every export size all get a sharp render. */
 let T=null,Tload=null;
-const m3={active:false,name:'',pivot:null,meshes:[]};
+const m3={active:false,name:'',pivot:null,meshes:[],kind:'model',zr:1,svg:null,relief:null,reliefTex:null,needsBuild:false};
 const is3D=()=>m3.active&&!!T&&!!m3.pivot;
 function ensureThree(){if(T)return Promise.resolve(T);if(Tload)return Tload;
   Tload=(async()=>{const A='three/addons/';
-    const [THREE,{GLTFLoader},{OBJLoader},{MTLLoader},{STLLoader},{DRACOLoader},{MeshoptDecoder}]=await Promise.all([
+    const [THREE,{GLTFLoader},{OBJLoader},{MTLLoader},{STLLoader},{DRACOLoader},{MeshoptDecoder},{SVGLoader}]=await Promise.all([
       import('three'),import(A+'loaders/GLTFLoader.js'),import(A+'loaders/OBJLoader.js'),import(A+'loaders/MTLLoader.js'),
-      import(A+'loaders/STLLoader.js'),import(A+'loaders/DRACOLoader.js'),import(A+'libs/meshopt_decoder.module.js')]);
+      import(A+'loaders/STLLoader.js'),import(A+'loaders/DRACOLoader.js'),import(A+'libs/meshopt_decoder.module.js'),import(A+'loaders/SVGLoader.js')]);
     const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(1);
     const gl=renderer.getContext(),vp=gl.getParameter(gl.MAX_VIEWPORT_DIMS)||[4096,4096];
     const maxPx=Math.min(8192,renderer.capabilities.maxTextureSize||4096,vp[0],vp[1]);
@@ -644,14 +666,15 @@ function ensureThree(){if(T)return Promise.resolve(T);if(Tload)return Tload;
     const mats={clay:new THREE.MeshStandardMaterial({color:0xdcdcdc,roughness:.9,metalness:0,side}),
       flat:new THREE.MeshStandardMaterial({color:0xdcdcdc,roughness:.9,metalness:0,flatShading:true,side}),
       depth:new THREE.MeshDepthMaterial({side}),normals:new THREE.MeshNormalMaterial({side})};
-    T={THREE,GLTFLoader,OBJLoader,MTLLoader,STLLoader,MeshoptDecoder,draco,renderer,maxPx,scene,sun,amb,pcam,ocam,mats};return T})();
+    T={THREE,GLTFLoader,OBJLoader,MTLLoader,STLLoader,SVGLoader,MeshoptDecoder,draco,renderer,maxPx,scene,sun,amb,pcam,ocam,mats};return T})();
   Tload.catch(()=>{Tload=null});return Tload}
 function applyMat(){if(!T)return;const v=state.v3.mat,m=T.mats[v];m3.meshes.forEach(o=>{o.material=v==='original'||!m?o.userData.orig:m})}
 function disposeModel(){if(!m3.pivot)return;T.scene.remove(m3.pivot);
   m3.pivot.traverse(o=>{if(o.geometry)o.geometry.dispose();const ms=o.userData.orig;
     (Array.isArray(ms)?ms:ms?[ms]:[]).forEach(m=>{for(const k in m){const v=m[k];if(v&&v.isTexture)v.dispose()}m.dispose()})});
   m3.pivot=null;m3.meshes=[]}
-function setModel(obj,name){const{THREE}=T;
+/* opts.radius: fixed fit size, so changing extrude depth or relief height doesn't rescale the shape */
+function setModel(obj,name,opts={}){const{THREE}=T;
   const extra=[];obj.traverse(o=>{if(o.isLight||o.isCamera)extra.push(o)});extra.forEach(o=>o.parent&&o.parent.remove(o));
   const meshes=[];obj.traverse(o=>{if(o.isMesh){meshes.push(o);o.userData.orig=o.material}});
   if(!meshes.length){toast('No 3D surfaces found in that file.');return false}
@@ -659,8 +682,9 @@ function setModel(obj,name){const{THREE}=T;
   if(box.isEmpty()){toast('That model is empty.');return false}
   /* centre the model and scale it to fit a sphere of radius 1, so the camera never needs adjusting */
   const sph=box.getBoundingSphere(new THREE.Sphere()),inner=new THREE.Group(),fitter=new THREE.Group(),pivot=new THREE.Group();
-  inner.add(obj);inner.position.copy(sph.center).negate();fitter.add(inner);fitter.scale.setScalar(1/(sph.radius||1));pivot.add(fitter);
-  disposeModel();T.scene.add(pivot);m3.pivot=pivot;m3.meshes=meshes;m3.name=name;m3.active=true;
+  const rad=opts.radius>0?opts.radius:(sph.radius||1);
+  inner.add(obj);inner.position.copy(sph.center).negate();fitter.add(inner);fitter.scale.setScalar(1/rad);pivot.add(fitter);
+  disposeModel();T.scene.add(pivot);if(opts.kind)m3.kind=opts.kind;m3.pivot=pivot;m3.meshes=meshes;m3.name=name;m3.active=true;m3.zr=Math.max(1,(sph.radius||rad)/rad);
   applyMat();show3D();touch3D();return true}
 function frameWH(L){const[a,b]=String(state.v3.frame).split(':').map(Number);if(!(a>0&&b>0))return[L,L];
   return a>=b?[L,Math.max(1,Math.round(L*b/a))]:[Math.max(1,Math.round(L*a/b)),L]}
@@ -673,14 +697,88 @@ function render3D(L){const{THREE,renderer,scene,sun,amb,pcam,ocam,maxPx}=T,v=sta
   if(v.proj==='ortho'){cam=ocam;dist=4;const r=1.04;
     if(asp>=1){cam.left=-r*asp;cam.right=r*asp;cam.top=r;cam.bottom=-r}else{cam.left=-r;cam.right=r;cam.top=r/asp;cam.bottom=-r/asp}}
   else{cam=pcam;cam.fov=v.fov;cam.aspect=asp;const hv=v.fov*D/2,hh=Math.atan(Math.tan(hv)*asp);dist=1.04/Math.sin(Math.min(hv,hh))}
-  cam.position.set(0,0,dist);cam.lookAt(0,0,0);cam.zoom=v.zoom;cam.near=Math.max(.01,dist-1.05);cam.far=dist+1.05;cam.updateProjectionMatrix();
+  cam.position.set(0,0,dist);cam.lookAt(0,0,0);cam.zoom=v.zoom;cam.near=Math.max(.01,dist-1.05*m3.zr);cam.far=dist+1.05*m3.zr;cam.updateProjectionMatrix();
   const g=v.bg/255;renderer.setClearColor(new THREE.Color().setRGB(g,g,g,THREE.SRGBColorSpace),1);
   renderer.setSize(rw,rh,false);renderer.render(scene,cam);
   const c=mkCanvas(w,h),x=ctx2d(c);x.imageSmoothingQuality='high';x.drawImage(renderer.domElement,0,0,w,h);return c}
 function touch3D(){srcVer++;baseCache=null;save();schedule()}
-function show3D(){$('#m3Block').hidden=!m3.active;$('#m3Name').textContent=m3.name;$('#view').classList.toggle('orbit',m3.active)}
+function show3D(){$('#m3Block').hidden=!m3.active;$('#m3Name').textContent=m3.name;$('#view').classList.toggle('orbit',m3.active);
+  $('#reliefBtn').hidden=m3.active;
+  document.querySelectorAll('.m3sec[data-kind]').forEach(s=>{const k=s.dataset.kind;s.hidden=!!k&&k!==m3.kind})}
+
+/* ---------- SVG extrusion & image relief ---------- */
+function buildSVG(){const{THREE,SVGLoader}=T,v=state.v3,{data,box}=m3.svg,S=box.size,paths=data.paths,n=paths.length;
+  const depth=Math.max(S*.002,v.exDepth/100*S),bev=v.exBevel/100*S,tubeR=Math.max(S*.0005,v.exTube/100*S*.5);
+  const mat=new THREE.MeshStandardMaterial({color:0xdcdcdc,roughness:.9,metalness:0,side:THREE.DoubleSide});
+  const g=new THREE.Group(),zOf=i=>n>1?i/(n-1)*v.exStagger/100*S:0;let bad=0;
+  paths.forEach((p,i)=>{const st=p.userData&&p.userData.style||{},hasFill=st.fill!==undefined&&st.fill!=='none'&&st.fill!=='transparent',
+      hasStroke=!!st.stroke&&st.stroke!=='none'&&st.stroke!=='transparent';
+    const wantFill=v.exMode==='fill'||(v.exMode==='auto'&&(hasFill||!hasStroke)),wantTube=v.exMode==='tube'||(v.exMode==='auto'&&!hasFill&&hasStroke);
+    if(wantFill){let shapes=[];try{shapes=SVGLoader.createShapes(p)}catch(e){bad++}
+      shapes.forEach(sh=>{try{const geo=new THREE.ExtrudeGeometry(sh,{depth,bevelEnabled:bev>0,bevelThickness:bev,bevelSize:bev,bevelOffset:0,bevelSegments:v.exSmooth,curveSegments:16});
+        const m=new THREE.Mesh(geo,mat);m.position.z=zOf(i);g.add(m)}catch(e){bad++}})}
+    if(wantTube)p.subPaths.forEach(sp=>{try{const pts=sp.getPoints();if(pts.length<2)return;
+      const closed=!!sp.autoClose,curve=new THREE.CatmullRomCurve3(pts.map(q=>new THREE.Vector3(q.x,q.y,0)),closed,'centripetal');
+      const geo=new THREE.TubeGeometry(curve,Math.min(2000,Math.max(16,pts.length*3)),tubeR,8,closed);
+      const m=new THREE.Mesh(geo,mat);m.position.z=zOf(i)+depth/2;g.add(m)}catch(e){bad++}})});
+  if(bad)console.warn('SVG: skipped',bad,'broken shapes');
+  g.scale.y=-1;/* SVG y points down, 3D y points up */
+  return setModel(g,m3.name,{radius:Math.hypot(box.w,box.h)/2})}
+function buildRelief(){const{THREE}=T,v=state.v3,img=m3.relief,asp=img.width/img.height,D=Math.round(v.rfDetail);
+  const gx=asp>=1?D:Math.max(2,Math.round(D*asp)),gy=asp>=1?Math.max(2,Math.round(D/asp)):D,cw=gx+1,ch=gy+1;
+  const c=mkCanvas(cw,ch),x=ctx2d(c);x.imageSmoothingQuality='high';x.drawImage(img,0,0,cw,ch);
+  const d=x.getImageData(0,0,cw,ch).data;let hg=new Float32Array(cw*ch);
+  for(let i=0,j=0;i<hg.length;i++,j+=4)hg[i]=(.299*d[j]+.587*d[j+1]+.114*d[j+2])/255;
+  if(v.rfSmooth>0)hg=blur2(hg,cw,ch,v.rfSmooth*D/200);
+  const W=asp>=1?2:2*asp,H=asp>=1?2/asp:2,geo=new THREE.PlaneGeometry(W,H,gx,gy),pos=geo.attributes.position,amp=v.rfHeight/100*2,dark=v.rfDir==='dark';
+  for(let i=0;i<pos.count;i++)pos.setZ(i,(dark?1-hg[i]:hg[i])*amp);
+  geo.computeVertexNormals();
+  if(!m3.reliefTex){m3.reliefTex=new THREE.CanvasTexture(img);m3.reliefTex.colorSpace=THREE.SRGBColorSpace}
+  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:m3.reliefTex,roughness:.9,metalness:0,side:THREE.DoubleSide}));
+  return setModel(mesh,m3.name,{radius:Math.hypot(W,H)/2})}
+const rebuild=()=>m3.kind==='svg'?buildSVG():m3.kind==='relief'?buildRelief():false;
+let buildQueued=false;
+function queueBuild(){if(buildQueued)return;buildQueued=true;requestAnimationFrame(()=>{buildQueued=false;if(m3.active&&m3.kind!=='model')rebuild()})}
+function svgBox(data){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  data.paths.forEach(p=>p.subPaths.forEach(sp=>sp.getPoints().forEach(q=>{if(q.x<x0)x0=q.x;if(q.x>x1)x1=q.x;if(q.y<y0)y0=q.y;if(q.y>y1)y1=q.y})));
+  if(!isFinite(x0))return null;const w=Math.max(1e-6,x1-x0),h=Math.max(1e-6,y1-y0);return{w,h,size:Math.max(w,h)}}
+/* draw an SVG to a canvas at a good size, even when it has no width/height of its own */
+function svgToCanvas(text,max=2400){return new Promise((res,rej)=>{
+  const doc=new DOMParser().parseFromString(text,'image/svg+xml'),svg=doc.documentElement;
+  if(!svg||svg.nodeName.toLowerCase()!=='svg'||doc.querySelector('parsererror'))return rej(new Error('not svg'));
+  const num=a=>{const s=svg.getAttribute(a);return s&&!/%/.test(s)?parseFloat(s):NaN};
+  const vb=(svg.getAttribute('viewBox')||'').trim().split(/[\s,]+/).map(Number);let w=num('width'),h=num('height');
+  if(vb.length===4&&vb[2]>0&&vb[3]>0){if(!(w>0&&h>0)){w=vb[2];h=vb[3]}}
+  else if(w>0&&h>0)svg.setAttribute('viewBox',`0 0 ${w} ${h}`);else{w=h=1000}
+  const s=max/Math.max(w,h),W=Math.round(w*s),H=Math.round(h*s);svg.setAttribute('width',W);svg.setAttribute('height',H);
+  const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'})),im=new Image();
+  im.onload=()=>{const c=mkCanvas(W,H),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(im,0,0,W,H);URL.revokeObjectURL(url);res(c)};
+  im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('svg draw'))};im.src=url})}
+async function extrudeSVG(text,name){if(!T)toast('Loading the 3D engine…');
+  try{await ensureThree()}catch(e){console.error(e);engineFail();return}
+  let data;try{data=new T.SVGLoader().parse(text)}catch(e){console.error(e);toast('Could not read that SVG.');return}
+  const box=data&&data.paths&&data.paths.length?svgBox(data):null;
+  if(!box){toast('No shapes found in that SVG. Convert text to outlines and try again.');return}
+  m3.kind='svg';m3.svg={data,box};m3.name=name;
+  if(buildSVG())toast('Extruded '+name+'. Drag the picture to spin it.');else m3.kind='model'}
+async function makeRelief(name){if(!src)return;if(!T)toast('Loading the 3D engine…');
+  try{await ensureThree()}catch(e){console.error(e);engineFail();return}
+  if(m3.reliefTex){m3.reliefTex.dispose();m3.reliefTex=null}
+  const m=1600,s=Math.min(1,m/Math.max(src.width,src.height)),c=mkCanvas(Math.round(src.width*s),Math.round(src.height*s));
+  c.getContext('2d').drawImage(src,0,0,c.width,c.height);
+  m3.kind='relief';m3.relief=c;m3.name=name||'Relief';
+  if(buildRelief())toast('Relief made. Tilt it and move the light to bring out the depth.');else m3.kind='model'}
+let svgPending=null;
+function askSVG(file){file.text().then(text=>{svgPending={text,name:file.name};$('#svgAskName').textContent=file.name;$('#svgAsk').hidden=false;
+    $('#svgAsk [data-svg="extrude"]').focus()}).catch(()=>toast('Could not read that SVG.'))}
+$('#svgAsk').addEventListener('click',async e=>{const b=e.target.closest('[data-svg]');if(!b&&e.target!==e.currentTarget)return;
+  $('#svgAsk').hidden=true;const p=svgPending;svgPending=null;const a=b?b.dataset.svg:'cancel';if(!p||a==='cancel')return;
+  if(a==='extrude'){extrudeSVG(p.text,p.name);return}
+  let c;try{c=await svgToCanvas(p.text)}catch(err){console.error(err);toast('Could not draw that SVG.');return}
+  setSource(c);if(a==='relief')makeRelief('Relief · '+p.name);else toast('Loaded '+p.name)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#svgAsk').hidden){$('#svgAsk').hidden=true;svgPending=null}});
 const engineFail=()=>toast('Could not start 3D. It needs an internet connection and a browser with WebGL.');
-const RX3=/\.(glb|gltf|obj|stl)$/i;
+const RX3=/\.(glb|gltf|obj|stl)$/i,RXSVG=/\.svg$/i;
 async function load3D(main,files){
   if(!T)toast('Loading the 3D engine…');
   try{await ensureThree()}catch(e){console.error(e);engineFail();return}
@@ -701,16 +799,17 @@ async function load3D(main,files){
       obj=l.parse(await main.text())}
     else{const geo=new T.STLLoader().parse(await main.arrayBuffer());if(!geo.attributes.normal)geo.computeVertexNormals();
       obj=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0xdcdcdc,roughness:.9,vertexColors:!!geo.attributes.color}))}
-    if(obj&&setModel(obj,main.name))toast('Loaded '+main.name+'. Drag the picture to spin it.')}
+    if(obj&&setModel(obj,main.name,{kind:'model'}))toast('Loaded '+main.name+'. Drag the picture to spin it.')}
   catch(e){console.error(e);const n=(miss[0]||'').split(/[\\/]/).pop();
     toast(n?`Missing ${n}. Drop it together with the model, or use a .glb file.`:'Could not read that model. Try .glb, .obj or .stl.')}
   setTimeout(()=>urls.forEach(u=>URL.revokeObjectURL(u)),60000)}
 async function sample3D(){if(!T)toast('Loading the 3D engine…');
   try{await ensureThree()}catch(e){console.error(e);engineFail();return}
   const{THREE}=T,m=new THREE.Mesh(new THREE.TorusKnotGeometry(1,.34,320,48,2,3),new THREE.MeshStandardMaterial({color:0xdcdcdc,roughness:.9}));
-  if(setModel(m,'Sample · torus knot'))toast('Drag the picture to spin the model.')}
+  if(setModel(m,'Sample · torus knot',{kind:'model'}))toast('Drag the picture to spin the model.')}
 function handleFiles(list){const files=[...(list||[])];if(!files.length)return;
   const main=files.find(f=>RX3.test(f.name));if(main){load3D(main,files);return}
+  const svgF=files.find(f=>RXSVG.test(f.name)||f.type==='image/svg+xml');if(svgF){askSVG(svgF);return}
   if(files.some(f=>/\.(mtl|bin)$/i.test(f.name))){toast('Add the .obj or .gltf file too.');return}
   loadFile(files.find(f=>f.type.startsWith('image/'))||files[0])}
 
@@ -792,15 +891,16 @@ function buildAll(){buildLayers();buildTarget()}
 
 /* ---------- UI: 3D model panel ---------- */
 const m3P=$('#m3Params');
-m3P.innerHTML=V3P.map(([title,ps])=>`<div class="sub">${esc(title)}</div>`+ps.map(q=>{const id='v3-'+q.key,da=`data-k3="${q.key}"`;
+m3P.innerHTML=V3P.map(([title,ps,kind])=>`<div class="m3sec"${kind?` data-kind="${kind}"`:''}><div class="sub">${esc(title)}</div>`+ps.map(q=>{const id='v3-'+q.key,da=`data-k3="${q.key}"`;
   if(q.type==='range')return `<div class="prm" id="${id}-row"><label for="${id}">${esc(q.label)}</label><input type="range" id="${id}" ${da} min="${q.min}" max="${q.max}" step="${q.step}" value="${q.def}"><output id="${id}-o">${fmt(q,q.def)}</output></div>`;
-  return `<div class="prm" id="${id}-row"><label for="${id}">${esc(q.label)}</label><select class="sel" id="${id}" ${da}>${q.options.map(([o,l])=>`<option value="${o}">${esc(l)}</option>`).join('')}</select></div>`}).join('')).join('');
+  return `<div class="prm" id="${id}-row"><label for="${id}">${esc(q.label)}</label><select class="sel" id="${id}" ${da}>${q.options.map(([o,l])=>`<option value="${o}">${esc(l)}</option>`).join('')}</select></div>`}).join('')+'</div>').join('');
 function sync3D(){const v=state.v3;V3ALL.forEach(q=>{const el=document.getElementById('v3-'+q.key);if(!el)return;el.value=v[q.key];
     if(q.type==='range')document.getElementById('v3-'+q.key+'-o').textContent=fmt(q,v[q.key])});
   const flat=v.proj==='ortho';$('#v3-fov-row').classList.toggle('dis',flat);$('#v3-fov').disabled=flat}
 m3P.addEventListener('input',e=>{const k=e.target.dataset.k3;if(!k)return;const q=V3ALL.find(p=>p.key===k);if(!q)return;
   state.v3[k]=q.type==='range'?+e.target.value:e.target.value;
   if(q.type==='range')document.getElementById('v3-'+k+'-o').textContent=fmt(q,e.target.value);
+  if(GEOKEY.test(k)){save();queueBuild();return}
   if(k==='mat')applyMat();if(k==='proj')sync3D();touch3D()});
 $('#m3Views').innerHTML=Object.keys(VIEWS).map(k=>`<button class="chip" type="button" data-view="${esc(k)}">${esc(k)}</button>`).join('')+'<button class="chip" type="button" data-view="reset">Reset camera</button>';
 $('#m3Views').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;const v=state.v3,k=b.dataset.view;
@@ -814,6 +914,7 @@ view.addEventListener('pointermove',e=>{if(!orb)return;const dx=e.clientX-orb.x,
 ['pointerup','pointercancel','lostpointercapture'].forEach(t=>view.addEventListener(t,()=>{orb=null}));
 view.addEventListener('wheel',e=>{if(!is3D())return;e.preventDefault();const v=state.v3;v.zoom=+clamp(v.zoom*Math.exp(-e.deltaY*.0015),.3,4).toFixed(2);sync3D();touch3D()},{passive:false});
 $('#sample3dBtn').addEventListener('click',sample3D);
+$('#reliefBtn').addEventListener('click',()=>makeRelief('Relief'));
 
 /* ---------- UI: layers ---------- */
 const layersEl=$('#layers');
