@@ -1,0 +1,790 @@
+{
+  "app": "distort-press",
+  "version": 1,
+  "presets": [
+    {
+      "name": "portfolio",
+      "data": {
+        "ink": "#2a2421",
+        "paper": "#ebe7dc",
+        "grain": 6,
+        "globalOn": true,
+        "layers": [
+          {
+            "name": "1",
+            "visible": true,
+            "opacity": 100,
+            "blend": "normal",
+            "mask": {
+              "lo": 0,
+              "hi": 154,
+              "feather": 57,
+              "invert": false
+            },
+            "stack": [
+              {
+                "type": "tone",
+                "on": true,
+                "open": false,
+                "seed": 1124,
+                "params": {
+                  "brightness": -47,
+                  "contrast": 28,
+                  "gamma": 1.1,
+                  "blur": 0,
+                  "sharpen": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": true,
+                "open": true,
+                "seed": 9043,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -56,
+                  "gain": 1.05,
+                  "jitter": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "spread",
+                "on": true,
+                "open": false,
+                "seed": 251764600,
+                "params": {
+                  "spread": 0,
+                  "level": 127,
+                  "grit": 40,
+                  "speckle": 0
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 133233805,
+                "params": {
+                  "strength": 6,
+                  "pre": 0.5,
+                  "weight": 2.5,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": false,
+                "open": false,
+                "seed": 173855816,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": 77,
+                  "gain": 1,
+                  "jitter": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "posterize",
+                "on": false,
+                "open": true,
+                "seed": 579258467,
+                "params": {
+                  "levels": 9
+                }
+              }
+            ]
+          }
+        ],
+        "global": []
+      }
+    },
+    {
+      "name": "thermal",
+      "data": {
+        "ink": "#2a2421",
+        "paper": "#ebe7dc",
+        "grain": 6,
+        "globalOn": true,
+        "layers": [
+          {
+            "name": "1",
+            "visible": true,
+            "opacity": 100,
+            "blend": "normal",
+            "mask": {
+              "lo": 0,
+              "hi": 255,
+              "feather": 36,
+              "invert": false
+            },
+            "stack": [
+              {
+                "type": "tone",
+                "on": false,
+                "open": false,
+                "seed": 1124,
+                "params": {
+                  "brightness": -47,
+                  "contrast": 28,
+                  "gamma": 1.1,
+                  "blur": 0,
+                  "sharpen": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": false,
+                "open": false,
+                "seed": 9043,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -56,
+                  "gain": 1.05,
+                  "jitter": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "spread",
+                "on": true,
+                "open": false,
+                "seed": 251764600,
+                "params": {
+                  "spread": 0,
+                  "level": 127,
+                  "grit": 40,
+                  "speckle": 0
+                }
+              },
+              {
+                "type": "edges",
+                "on": true,
+                "open": true,
+                "seed": 133233805,
+                "params": {
+                  "strength": 6,
+                  "pre": 0.5,
+                  "weight": 2.5,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": true,
+                "open": false,
+                "seed": 173855816,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": 77,
+                  "gain": 1,
+                  "jitter": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "posterize",
+                "on": true,
+                "open": false,
+                "seed": 579258467,
+                "params": {
+                  "levels": 9
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 658993405,
+                "params": {
+                  "strength": 1.7,
+                  "pre": 0.5,
+                  "weight": 0,
+                  "invert": true
+                }
+              }
+            ]
+          }
+        ],
+        "global": []
+      }
+    },
+    {
+      "name": "Gianelli tee logo",
+      "data": {
+        "ink": "#2a2421",
+        "paper": "#ffffff",
+        "grain": 6,
+        "globalOn": true,
+        "layers": [
+          {
+            "name": "1",
+            "visible": true,
+            "opacity": 100,
+            "blend": "normal",
+            "mask": {
+              "lo": 0,
+              "hi": 255,
+              "feather": 36,
+              "invert": false
+            },
+            "stack": [
+              {
+                "type": "tone",
+                "on": false,
+                "open": false,
+                "seed": 1124,
+                "params": {
+                  "brightness": -47,
+                  "contrast": 28,
+                  "gamma": 1.1,
+                  "blur": 0,
+                  "sharpen": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": false,
+                "open": false,
+                "seed": 9043,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -56,
+                  "gain": 1.05,
+                  "jitter": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "spread",
+                "on": true,
+                "open": true,
+                "seed": 251764600,
+                "params": {
+                  "spread": 2.25,
+                  "level": 68,
+                  "grit": 0,
+                  "speckle": 0
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 133233805,
+                "params": {
+                  "strength": 7.6,
+                  "pre": 5.5,
+                  "weight": 0.5,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": true,
+                "open": true,
+                "seed": 173855816,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -90,
+                  "gain": 0.75,
+                  "jitter": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 658993405,
+                "params": {
+                  "strength": 1.7,
+                  "pre": 0.5,
+                  "weight": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "threshold",
+                "on": true,
+                "open": true,
+                "seed": 526729487,
+                "params": {
+                  "level": 207,
+                  "jitter": 0
+                }
+              }
+            ]
+          }
+        ],
+        "global": []
+      }
+    },
+    {
+      "name": "Gianelli tee logo II",
+      "data": {
+        "ink": "#2a2421",
+        "paper": "#ffffff",
+        "grain": 6,
+        "globalOn": true,
+        "layers": [
+          {
+            "name": "1",
+            "visible": true,
+            "opacity": 100,
+            "blend": "normal",
+            "mask": {
+              "lo": 7,
+              "hi": 69,
+              "feather": 0,
+              "invert": false
+            },
+            "stack": [
+              {
+                "type": "tone",
+                "on": false,
+                "open": false,
+                "seed": 1124,
+                "params": {
+                  "brightness": -47,
+                  "contrast": 28,
+                  "gamma": 1.1,
+                  "blur": 0,
+                  "sharpen": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": false,
+                "open": false,
+                "seed": 9043,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -56,
+                  "gain": 1.05,
+                  "jitter": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "spread",
+                "on": true,
+                "open": true,
+                "seed": 251764600,
+                "params": {
+                  "spread": 6.25,
+                  "level": 101,
+                  "grit": 103,
+                  "speckle": 5
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 133233805,
+                "params": {
+                  "strength": 7.6,
+                  "pre": 5.5,
+                  "weight": 0.5,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": true,
+                "open": true,
+                "seed": 173855816,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -90,
+                  "gain": 0.75,
+                  "jitter": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 658993405,
+                "params": {
+                  "strength": 1.7,
+                  "pre": 0.5,
+                  "weight": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "threshold",
+                "on": true,
+                "open": true,
+                "seed": 526729487,
+                "params": {
+                  "level": 207,
+                  "jitter": 0
+                }
+              }
+            ]
+          }
+        ],
+        "global": []
+      }
+    },
+    {
+      "name": "Gianelli tee logo II<I",
+      "data": {
+        "ink": "#2a2421",
+        "paper": "#ffffff",
+        "grain": 6,
+        "globalOn": true,
+        "layers": [
+          {
+            "name": "1",
+            "visible": true,
+            "opacity": 100,
+            "blend": "normal",
+            "mask": {
+              "lo": 0,
+              "hi": 59,
+              "feather": 0,
+              "invert": false
+            },
+            "stack": [
+              {
+                "type": "tone",
+                "on": false,
+                "open": false,
+                "seed": 1124,
+                "params": {
+                  "brightness": -47,
+                  "contrast": 28,
+                  "gamma": 1.1,
+                  "blur": 0,
+                  "sharpen": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": false,
+                "open": false,
+                "seed": 9043,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -56,
+                  "gain": 1.05,
+                  "jitter": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "spread",
+                "on": true,
+                "open": true,
+                "seed": 251764600,
+                "params": {
+                  "spread": 7.75,
+                  "level": 101,
+                  "grit": 103,
+                  "speckle": 5
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 133233805,
+                "params": {
+                  "strength": 7.6,
+                  "pre": 5.5,
+                  "weight": 0.5,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": true,
+                "open": true,
+                "seed": 173855816,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -90,
+                  "gain": 0.75,
+                  "jitter": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 658993405,
+                "params": {
+                  "strength": 1.7,
+                  "pre": 0.5,
+                  "weight": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "threshold",
+                "on": true,
+                "open": true,
+                "seed": 526729487,
+                "params": {
+                  "level": 207,
+                  "jitter": 0
+                }
+              }
+            ]
+          }
+        ],
+        "global": []
+      }
+    },
+    {
+      "name": "Gianelli tee logo TEXT",
+      "data": {
+        "ink": "#2a2421",
+        "paper": "#ffffff",
+        "grain": 6,
+        "globalOn": true,
+        "layers": [
+          {
+            "name": "1",
+            "visible": true,
+            "opacity": 100,
+            "blend": "normal",
+            "mask": {
+              "lo": 0,
+              "hi": 255,
+              "feather": 56,
+              "invert": false
+            },
+            "stack": [
+              {
+                "type": "tone",
+                "on": false,
+                "open": false,
+                "seed": 1124,
+                "params": {
+                  "brightness": -47,
+                  "contrast": 28,
+                  "gamma": 1.1,
+                  "blur": 0,
+                  "sharpen": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": false,
+                "open": false,
+                "seed": 9043,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -56,
+                  "gain": 1.05,
+                  "jitter": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "spread",
+                "on": true,
+                "open": false,
+                "seed": 251764600,
+                "params": {
+                  "spread": 1,
+                  "level": 108,
+                  "grit": 0,
+                  "speckle": 0
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 133233805,
+                "params": {
+                  "strength": 7.6,
+                  "pre": 5.5,
+                  "weight": 0.5,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": false,
+                "open": false,
+                "seed": 173855816,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -90,
+                  "gain": 0.75,
+                  "jitter": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 658993405,
+                "params": {
+                  "strength": 1.7,
+                  "pre": 0.5,
+                  "weight": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "threshold",
+                "on": true,
+                "open": false,
+                "seed": 526729487,
+                "params": {
+                  "level": 142,
+                  "jitter": 0
+                }
+              }
+            ]
+          }
+        ],
+        "global": []
+      }
+    },
+    {
+      "name": "charcoal",
+      "data": {
+        "ink": "#2a2421",
+        "paper": "#ffffff",
+        "grain": 6,
+        "globalOn": true,
+        "layers": [
+          {
+            "name": "1",
+            "visible": true,
+            "opacity": 100,
+            "blend": "normal",
+            "mask": {
+              "lo": 0,
+              "hi": 255,
+              "feather": 36,
+              "invert": false
+            },
+            "stack": [
+              {
+                "type": "tone",
+                "on": false,
+                "open": false,
+                "seed": 1124,
+                "params": {
+                  "brightness": -47,
+                  "contrast": 28,
+                  "gamma": 1.1,
+                  "blur": 0,
+                  "sharpen": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": false,
+                "open": false,
+                "seed": 9043,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -56,
+                  "gain": 1.05,
+                  "jitter": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "spread",
+                "on": true,
+                "open": true,
+                "seed": 251764600,
+                "params": {
+                  "spread": 2.25,
+                  "level": 68,
+                  "grit": 0,
+                  "speckle": 0
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 133233805,
+                "params": {
+                  "strength": 7.6,
+                  "pre": 5.5,
+                  "weight": 0.5,
+                  "invert": false
+                }
+              },
+              {
+                "type": "halftone",
+                "on": true,
+                "open": true,
+                "seed": 173855816,
+                "params": {
+                  "shape": "dot",
+                  "cell": 3,
+                  "angle": -90,
+                  "gain": 0.75,
+                  "jitter": 0,
+                  "invert": false
+                }
+              },
+              {
+                "type": "edges",
+                "on": false,
+                "open": false,
+                "seed": 658993405,
+                "params": {
+                  "strength": 1.7,
+                  "pre": 0.5,
+                  "weight": 0,
+                  "invert": true
+                }
+              },
+              {
+                "type": "threshold",
+                "on": true,
+                "open": true,
+                "seed": 526729487,
+                "params": {
+                  "level": 207,
+                  "jitter": 0
+                }
+              }
+            ]
+          }
+        ],
+        "global": []
+      }
+    }
+  ]
+}

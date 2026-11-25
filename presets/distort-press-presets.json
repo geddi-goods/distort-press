@@ -1,0 +1,56 @@
+{
+  "app": "distort-press",
+  "version": 1,
+  "presets": [
+    {
+      "name": "edgy",
+      "data": {
+        "ink": "#ffffff",
+        "paper": "#232323",
+        "grain": 6,
+        "globalOn": false,
+        "layers": [
+          {
+            "name": "layer 1",
+            "visible": true,
+            "opacity": 100,
+            "blend": "normal",
+            "mask": {
+              "lo": 173,
+              "hi": 14,
+              "feather": 0,
+              "invert": false
+            },
+            "stack": [
+              {
+                "type": "spread",
+                "on": true,
+                "open": false,
+                "seed": 37301947,
+                "params": {
+                  "spread": 1.75,
+                  "level": 135,
+                  "grit": 0,
+                  "speckle": 0
+                }
+              },
+              {
+                "type": "edges",
+                "on": true,
+                "open": true,
+                "seed": 66316574,
+                "params": {
+                  "strength": 4.3,
+                  "pre": 0.5,
+                  "weight": 0.5,
+                  "invert": false
+                }
+              }
+            ]
+          }
+        ],
+        "global": []
+      }
+    }
+  ]
+}
